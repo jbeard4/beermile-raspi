@@ -22,7 +22,7 @@ fs.open(LOG_FILE, 'a', function(err, fd){
   var debounceFlags = {};
 
   port.on('data', function (data) {
-    console.log('Data: ' + data);
+    //console.log('Data: ' + data);
     var m = data.match(re);
     if(m){
       var hexStr = m[1];
