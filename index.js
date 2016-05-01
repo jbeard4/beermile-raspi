@@ -22,7 +22,7 @@ fs.open(LOG_FILE, 'a', function(err, fd){
   var debounceFlags = {};
 
   port.on('data', function (data) {
-    //console.log('Data: ' + data);
+    console.log('Data: ' + data);
     var m = data.match(re);
     if(m){
       var hexStr = m[1];
@@ -43,25 +43,29 @@ fs.open(LOG_FILE, 'a', function(err, fd){
       fs.write(fd, s, function(err){
         if(err){
           console.log('Error writing file!', s);
+          port.write('E'); 
           return;
         }
 				console.log('Successfully saved to filesystem.', s);
-      }) 
+        port.write('S'); 
 
-			request.post({
-				auth : config.DB.auth,
-				uri : config.DB.host,
-				json : {
-					uid : hexStr,
-					timestamp : timestamp.toISOString()
-				}
-			},function(err,response,body){
-        if(err){
-          console.log('Error saving to database!', err);
-          return;
-        }
-				console.log('Successfully save to database', s, body);
-			}); 
+        request.post({
+          auth : config.DB.auth,
+          uri : config.DB.host,
+          json : {
+            uid : hexStr,
+            timestamp : timestamp.toISOString()
+          }
+        },function(err,response,body){
+          if(err){
+            console.log('Error saving to database!', err);
+            port.write('F'); 
+            return;
+          }
+          console.log('Successfully save to database', s, body);
+          port.write('T'); 
+        }); 
+      }); 
     }
   });
 })
